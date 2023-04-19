@@ -1,0 +1,30 @@
+# server
+server:
+  ip:
+    - 127.0.0.1
+  port: 80
+
+# mysql
+mysql:
+  user: yc
+  password: yc980704
+  ip: 127.0.0.1
+  port: 3306
+  db_name: seckill
+
+# redis
+redis:
+  ip: 127.0.0.1
+  port: 6379
+  password: yc980704
+  DB: 0
+
+# rabbitmq
+rabbitMQ:
+  ip: 127.0.0.1
+  port: 5672
+  user: yc
+  password: yc980704
+  name: seckill # 队列名称
+
+# nginx
