@@ -7,6 +7,7 @@ import (
 	"github.com/Powehi-cs/seckill/pkg/database"
 	"github.com/Powehi-cs/seckill/pkg/errors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -17,7 +18,10 @@ func main() {
 
 	db := database.GetDataBase()
 	err := db.AutoMigrate(&model.User{}, &model.Product{}) // 绑定模型
-
 	errors.PrintInStdout(err)
+
 	database.RedisConnect() // 初始化redis
+
+	err = router.Run(viper.GetString("server.ip") + ":" + viper.GetString("server.port"))
+	errors.PrintInStdout(err)
 }

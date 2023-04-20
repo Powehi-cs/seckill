@@ -1,9 +1,8 @@
 # server
 server:
-  ip:
-    - 127.0.0.1
-    - 121.41.59.142
+  ip: 127.0.0.1
   port: 80
+  secret: yuan_cheng_second_kill
 
 # mysql
 mysql:
