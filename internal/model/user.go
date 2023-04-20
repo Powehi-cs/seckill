@@ -2,34 +2,39 @@ package model
 
 import (
 	"github.com/Powehi-cs/seckill/pkg/database"
-	"github.com/Powehi-cs/seckill/pkg/errors"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	nickName string // 用户名称
-	password string // 用户密码
+	Name     string `gorm:"type:string;size:256;not null;uniqueIndex"`
+	Password string `gorm:"type:string;size:256;not null;"`
 }
 
-func (u *User) Insert(nickName, password string) {
+// Create 创建一个用户
+func (u *User) Create() error {
 	db := database.GetDataBase()
-	user := &User{nickName: nickName, password: password}
-	result := db.Create(user)
-	errors.PrintInStdout(result.Error)
+	result := db.Create(u)
+	return result.Error
 }
 
-func (u *User) Update(password string) {
+// Delete 删除掉对应name值的用户
+func (u *User) Delete() error {
 	db := database.GetDataBase()
-	db.Model(u).Update("password", password)
+	result := db.Where("name = ?", u.Name).Delete(u)
+	return result.Error
 }
 
-func (u *User) Select(nickName string) {
+// Update 根据name更新用户密码
+func (u *User) Update() error {
 	db := database.GetDataBase()
-	db.Where("nickName = ?", nickName).First(u)
+	result := db.Model(u).Where("name = ?", u.Name).Update("password", u.Password)
+	return result.Error
 }
 
-func (u *User) Delete() {
+// Select 根据name查找用户
+func (u *User) Select() error {
 	db := database.GetDataBase()
-	db.Where("nickName = ?", u.nickName).Delete(&User{})
+	result := db.Where("name = ?", u.Name).First(u)
+	return result.Error
 }
