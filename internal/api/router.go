@@ -27,13 +27,13 @@ func Router(router *gin.Engine) {
 	}
 
 	// 管理员(唯一管理员)
-	router.POST("/admin/login", handler.AdminLogin) // 管理员登录逻辑
+	router.GET("/admin/login", middleware.AuthVerify(), handler.AdminLoginPage) // 管理员登录页面
+	router.POST("/admin/login", handler.AdminLogin)                             // 管理员登录逻辑
 	admin := router.Group("/admin/").Use(middleware.AuthVerify())
 	{
-		admin.GET("login", handler.AdminLoginPage) // 管理员登录页面
-		admin.GET("", handler.Search)              // 管理员查询商品
-		admin.POST("", handler.Insert)             // 管理员增加商品
-		admin.PUT("", handler.Update)              // 管理员修改商品
-		admin.DELETE("", handler.Delete)           // 管理员删除商品
+		admin.GET("", handler.Search)    // 管理员查询商品
+		admin.POST("", handler.Insert)   // 管理员增加商品
+		admin.PUT("", handler.Update)    // 管理员修改商品
+		admin.DELETE("", handler.Delete) // 管理员删除商品
 	}
 }

@@ -17,7 +17,7 @@ func Register(ctx *gin.Context) {
 	}
 
 	// 存入mysql和redis
-	if user.Create(ctx) {
+	if !user.Create(ctx) {
 		logger.Fail(ctx, 403, "重复注册")
 		return
 	}

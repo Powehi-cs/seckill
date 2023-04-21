@@ -21,16 +21,17 @@ func AuthVerify() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			logger.Fail(ctx, 400, err.Error())
-			ctx.Abort()
+			ctx.Next()
 			return
 		}
 
 		if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			logger.Redirect(ctx, "/")
+			ctx.Abort()
 			return
 		}
-		logger.Redirect(ctx, "/login")
+
+		ctx.Next()
 	}
 }
 
