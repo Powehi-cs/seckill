@@ -10,8 +10,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Name     string `gorm:"type:string;size:256;not null;uniqueIndex" json:"name"`
-	Password string `gorm:"type:string;size:256;not null;" json:"password"`
+	Name     string `gorm:"type:string;size:256;not null;uniqueIndex" json:"name" form:"name" binding:"required"`
+	Password string `gorm:"type:string;size:256;not null;" json:"password" from:"password" binding:"required"`
 }
 
 // Create 创建一个用户

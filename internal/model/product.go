@@ -7,10 +7,10 @@ import (
 
 type Product struct {
 	gorm.Model
-	ProductID uint   `gorm:"type:uint;uniqueIndex;not null"`
-	Name      string `gorm:"type:string;size:256;not null"`
-	Price     int    `gorm:"type:int;not null"`
-	Inventory int    `gorm:"type:int;not null"`
+	ProductID uint   `gorm:"type:uint;uniqueIndex;not null" form:"product_id" binding:"required"`
+	Name      string `gorm:"type:string;size:256;not null" form:"name" binding:"required"`
+	Price     int    `gorm:"type:int;not null" form:"price" binding:"required"`
+	Inventory int    `gorm:"type:int;not null" form:"inventory" binding:"required"`
 }
 
 func (p *Product) Create() error {
