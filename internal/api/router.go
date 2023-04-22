@@ -8,6 +8,8 @@ import (
 
 // Router 路由设置
 func Router(router *gin.Engine) {
+	router.Use(middleware.Cors())
+
 	router.GET("/", handler.Index) // 首页逻辑
 
 	// 用户注册
