@@ -11,30 +11,41 @@ import (
 
 var Secret = []byte(viper.GetString("server.secret"))
 
-// AuthVerify 验证用户是否合法
+// AuthVerify 验证用户是否合法，不合法则返回登录页面
 func AuthVerify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString := ctx.GetHeader("Authorization")[7:]
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("加密算法错误: %s", token.Header["alg"])
-			}
-			return Secret, nil
-		})
 
-		if err != nil {
+		// 如果token解析成功，则继续
+		if claims, ok := ParseToken(tokenString); ok {
+			ctx.Set("name", claims.Name)
 			ctx.Next()
 			return
 		}
 
-		if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			logger.Redirect(ctx, "/")
-			ctx.Abort()
-			return
-		}
-
-		ctx.Next()
+		logger.Fail(ctx, 400, "token错误")
+		ctx.Abort()
+		return
 	}
+}
+
+func ParseToken(tokenString string) (*MyCustomClaims, bool) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("加密算法错误: %s", token.Header["alg"])
+		}
+		return Secret, nil
+	})
+
+	if err != nil {
+		return nil, false
+	}
+
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		return claims, true
+	}
+
+	return nil, false
 }
 
 type MyCustomClaims struct {

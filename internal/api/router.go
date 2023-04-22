@@ -19,7 +19,7 @@ func Router(router *gin.Engine) {
 	router.POST("/login", handler.Login)                             // 登录逻辑
 
 	// 秒杀路由
-	products := router.Group("/:user_id/:product_id/").Use(middleware.AuthVerify())
+	products := router.Group("/:user_id/:product_id/").Use(middleware.AuthVerify(), middleware.ConsistentHash())
 	{
 		// 用户秒杀
 		products.GET("", handler.ProductPage) // 单个产品页面

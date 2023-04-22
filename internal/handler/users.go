@@ -55,12 +55,16 @@ func Login(ctx *gin.Context) {
 
 // LoginPage 用户登录页面
 func LoginPage(ctx *gin.Context) {
-	logger.Success(ctx, "欢迎来到登录页面")
+	if _, ok := ctx.Get("name"); ok {
+		logger.Redirect(ctx, "/")
+	}
+
+	logger.Success(ctx, "欢迎来到登录界面")
 }
 
 // ProductPage 单个产品秒杀页面
 func ProductPage(ctx *gin.Context) {
-
+	logger.Success(ctx, "这是一个产品")
 }
 
 // SecKill 秒杀逻辑
