@@ -27,4 +27,9 @@ rabbitMQ:
   password: yc980704
   name: seckill # 队列名称
 
-# nginx
+# consistent hash
+ringHash:
+  ips:
+    - 127.0.0.1
+    - 121.41.59.142
+  replicas: 3
