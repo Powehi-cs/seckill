@@ -14,8 +14,7 @@ var Secret = []byte(viper.GetString("server.secret"))
 // AuthVerify 验证用户是否合法，不合法则返回登录页面
 func AuthVerify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenString := ctx.GetHeader("Authorization")[7:]
-
+		tokenString := ctx.GetHeader("Authorization")
 		// 如果token解析成功，则继续
 		if claims, ok := ParseToken(tokenString); ok {
 			ctx.Set("name", claims["name"])
@@ -30,6 +29,10 @@ func AuthVerify() gin.HandlerFunc {
 }
 
 func ParseToken(tokenString string) (jwt.MapClaims, bool) {
+	if len(tokenString) <= 7 {
+		return nil, false
+	}
+	tokenString = tokenString[7:]
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("加密算法错误: %s", token.Header["alg"])
