@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/Powehi-cs/seckill/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
@@ -22,8 +21,7 @@ func AuthVerify() gin.HandlerFunc {
 			return
 		}
 
-		logger.Fail(ctx, 400, "token错误")
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(400, "token解析失败")
 		return
 	}
 }

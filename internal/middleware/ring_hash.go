@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/Powehi-cs/seckill/pkg/errors"
-	"github.com/Powehi-cs/seckill/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"hash/crc32"
@@ -108,8 +107,7 @@ func ConsistentHash() gin.HandlerFunc {
 			ip = ring.Get(name.(string))
 		}
 		if ip == "" {
-			logger.Fail(ctx, 500, "一致性哈希出错")
-			ctx.Abort()
+			ctx.AbortWithStatusJSON(500, "一致性哈希出错")
 			return
 		}
 
@@ -119,7 +117,6 @@ func ConsistentHash() gin.HandlerFunc {
 		}
 
 		newURL := "http://" + ip + ctx.Request.URL.Path
-		logger.Redirect(ctx, newURL)
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(302, newURL)
 	}
 }

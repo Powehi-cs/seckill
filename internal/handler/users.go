@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/Powehi-cs/seckill/internal/middleware"
 	"github.com/Powehi-cs/seckill/internal/model"
-	"github.com/Powehi-cs/seckill/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,22 +11,22 @@ func Register(ctx *gin.Context) {
 	// 获取用户登录账号和密码
 	var user model.User
 	if ctx.ShouldBind(&user) != nil {
-		logger.Fail(ctx, 400, "请输入账号和密码")
+		ctx.JSON(400, "请输入账号和密码")
 		return
 	}
 
 	// 存入mysql和redis
 	if !user.Create(ctx) {
-		logger.Fail(ctx, 403, "重复注册")
+		ctx.JSON(403, "重复注册")
 		return
 	}
 
-	logger.Success(ctx, "注册成功")
+	ctx.JSON(200, "注册成功")
 }
 
 // RegisterPage 用户注册页面
 func RegisterPage(ctx *gin.Context) {
-	logger.Success(ctx, "欢迎来到注册页面")
+	ctx.JSON(200, "欢迎来到注册页面")
 }
 
 // Login 用户登录
@@ -35,7 +34,7 @@ func Login(ctx *gin.Context) {
 	// 获取用户登录账号和密码
 	var user model.User
 	if ctx.ShouldBind(&user) != nil {
-		logger.Fail(ctx, 400, "请输入账号和密码")
+		ctx.JSON(400, "请输入账号和密码")
 		return
 	}
 
@@ -43,31 +42,30 @@ func Login(ctx *gin.Context) {
 	if user.Select(ctx) {
 		if tokenString, ok := middleware.IssueToken(user.Name); ok {
 			ctx.Header("token", tokenString)
-			logger.Success(ctx, "登录成功")
-			logger.Redirect(ctx, "/")
+			ctx.JSON(302, "/")
 		} else {
-			logger.Fail(ctx, 500, "token生成错误")
+			ctx.JSON(500, "token生成错误")
 		}
 		return
 	}
-	logger.Fail(ctx, 403, "用户或者密码错误!")
+	ctx.JSON(403, "用户或者密码错误！")
 }
 
 // LoginPage 用户登录页面
 func LoginPage(ctx *gin.Context) {
 	if _, ok := ctx.Get("name"); ok {
-		logger.Redirect(ctx, "/")
+		ctx.JSON(302, "/")
+		return
 	}
-
-	logger.Success(ctx, "欢迎来到登录界面")
+	ctx.JSON(200, "欢迎来到登录界面")
 }
 
 // ProductPage 单个产品秒杀页面
 func ProductPage(ctx *gin.Context) {
-	logger.Success(ctx, "这是一个产品")
+	ctx.JSON(200, "这是一个产品")
 }
 
 // SecKill 秒杀逻辑
 func SecKill(ctx *gin.Context) {
-
+	ctx.JSON(200, "秒杀成功")
 }
