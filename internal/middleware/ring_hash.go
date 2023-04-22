@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"hash/crc32"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -114,8 +113,7 @@ func ConsistentHash() gin.HandlerFunc {
 			return
 		}
 
-		log.Println(ctx.RemoteIP(), ip, ip == ctx.RemoteIP(), ctx.ClientIP(), ctx.Request.URL.Host)
-		if ip == ctx.RemoteIP() {
+		if ip == viper.GetString("server.localhost_ip") {
 			ctx.Next()
 			return
 		}
