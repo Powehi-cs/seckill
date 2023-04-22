@@ -1,6 +1,6 @@
 # server
 server:
-  ip: 127.0.0.1
+  ip: 0.0.0.0
   port: 80
   secret: yuan_cheng_second_kill
 
