@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/Powehi-cs/seckill/pkg/errors"
 	"github.com/Powehi-cs/seckill/pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -114,16 +113,12 @@ func ConsistentHash() gin.HandlerFunc {
 			return
 		}
 
-		currentIP := viper.GetString("server.ip")
-		// 如果ip和当前ip一致的话继续
-		if ip == currentIP {
+		if ip == ctx.RemoteIP() {
 			ctx.Next()
 			return
 		}
 
-		// 重定向到目标ip
-		newURL := fmt.Sprintf("%s%s", ip, ctx.Request.URL.Path)
-		logger.Redirect(ctx, newURL)
+		logger.Redirect(ctx, ip+ctx.Request.URL.Path)
 		ctx.Abort()
 	}
 }

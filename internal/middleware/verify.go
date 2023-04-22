@@ -18,7 +18,7 @@ func AuthVerify() gin.HandlerFunc {
 
 		// 如果token解析成功，则继续
 		if claims, ok := ParseToken(tokenString); ok {
-			ctx.Set("name", claims.Name)
+			ctx.Set("name", claims["name"])
 			ctx.Next()
 			return
 		}
@@ -29,7 +29,7 @@ func AuthVerify() gin.HandlerFunc {
 	}
 }
 
-func ParseToken(tokenString string) (*MyCustomClaims, bool) {
+func ParseToken(tokenString string) (jwt.MapClaims, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("加密算法错误: %s", token.Header["alg"])
@@ -41,7 +41,7 @@ func ParseToken(tokenString string) (*MyCustomClaims, bool) {
 		return nil, false
 	}
 
-	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, true
 	}
 
