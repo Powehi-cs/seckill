@@ -118,7 +118,8 @@ func ConsistentHash() gin.HandlerFunc {
 			return
 		}
 
-		logger.Redirect(ctx, ip+ctx.Request.URL.Path)
+		newURL := "http://" + ip + ctx.Request.URL.Path
+		logger.Redirect(ctx, newURL)
 		ctx.Abort()
 	}
 }
