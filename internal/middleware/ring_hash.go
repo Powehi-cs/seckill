@@ -114,7 +114,7 @@ func ConsistentHash() gin.HandlerFunc {
 			return
 		}
 
-		log.Println(ctx.RemoteIP(), ip, ip == ctx.RemoteIP())
+		log.Println(ctx.RemoteIP(), ip, ip == ctx.RemoteIP(), ctx.ClientIP(), ctx.Request.URL.Host)
 		if ip == ctx.RemoteIP() {
 			ctx.Next()
 			return
