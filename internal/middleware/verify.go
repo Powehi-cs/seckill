@@ -9,15 +9,17 @@ import (
 	"time"
 )
 
+var Secret = []byte(viper.GetString("server.secret"))
+
 // AuthVerify 验证用户是否合法
 func AuthVerify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenString := ctx.GetHeader("token")
+		tokenString := ctx.GetHeader("Authorization")[7:]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("加密算法错误: %s", token.Header["alg"])
 			}
-			return []byte(viper.GetString("server.secret")), nil
+			return Secret, nil
 		})
 
 		if err != nil {
@@ -49,7 +51,8 @@ func IssueToken(name string) (string, bool) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(viper.GetString("server.secret"))
+
+	tokenString, err := token.SignedString(Secret)
 	if err != nil {
 		return tokenString, false
 	}

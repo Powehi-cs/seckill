@@ -54,21 +54,35 @@ func (u *User) Update(ctx *gin.Context) bool {
 	return true
 }
 
+func checkPassword(userPassword, realPassword string) bool {
+	if userPassword != realPassword {
+		return false
+	}
+	return true
+}
+
 // Select 根据name查找用户
 func (u *User) Select(ctx *gin.Context) bool {
 	rdb := database.GetRedis()
-	errRdb := rdb.Get(ctx, u.Name).Scan(u)
-
-	if errRdb != nil {
+	user := new(User)
+	errRdb := rdb.Get(ctx, u.Name).Scan(user)
+	if errRdb != nil { // redis中不存在该账号
 		db := database.GetDataBase()
-		errDb := db.Where("name = ?", u.Name).First(u).Error
-		if errDb != nil {
+		errDb := db.Where("name = ?", u.Name).First(user).Error
+		if errDb != nil { // 数据库中不存在该账号
 			return false
 		}
-		errRdb = rdb.Set(ctx, u.Name, u, 30*time.Minute).Err() // 将数据库中记录更新到缓存中
+		// 数据库中存在该账号，核对密码
+		if checkPassword(u.Password, user.Password) {
+			errRdb = rdb.Set(ctx, u.Name, u, 30*time.Minute).Err() // 将数据库中记录更新到缓存中
+			return true
+		}
+		// 密码错误
+		return false
 	}
 
-	return errRdb == nil
+	// redis中存在该账号，核对密码
+	return checkPassword(u.Password, user.Password)
 }
 
 func (u *User) MarshalBinary() ([]byte, error) {

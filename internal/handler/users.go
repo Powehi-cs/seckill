@@ -42,14 +42,15 @@ func Login(ctx *gin.Context) {
 	// 如果redis或mysql中存在
 	if user.Select(ctx) {
 		if tokenString, ok := middleware.IssueToken(user.Name); ok {
-			ctx.Set("token", tokenString)
-			logger.Success(ctx, "token生成成功")
+			ctx.Header("token", tokenString)
+			logger.Success(ctx, "登录成功")
+			logger.Redirect(ctx, "/")
 		} else {
 			logger.Fail(ctx, 500, "token生成错误")
 		}
 		return
 	}
-	logger.Fail(ctx, 403, "用户不存在, 请先登录")
+	logger.Fail(ctx, 403, "用户或者密码错误!")
 }
 
 // LoginPage 用户登录页面
