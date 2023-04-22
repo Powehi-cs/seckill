@@ -41,8 +41,7 @@ func Login(ctx *gin.Context) {
 	// 如果redis或mysql中存在
 	if user.Select(ctx) {
 		if tokenString, ok := middleware.IssueToken(user.Name); ok {
-			ctx.Header("token", tokenString)
-			ctx.JSON(302, "/")
+			ctx.JSON(302, gin.H{"path": "/", "token": tokenString})
 		} else {
 			ctx.JSON(500, "token生成错误")
 		}

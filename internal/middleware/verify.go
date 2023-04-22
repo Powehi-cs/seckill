@@ -14,6 +14,10 @@ var Secret = []byte(viper.GetString("server.secret"))
 func AuthVerify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString := ctx.GetHeader("Authorization")
+		if tokenString == "" {
+			ctx.Next()
+			return
+		}
 		// 如果token解析成功，则继续
 		if claims, ok := ParseToken(tokenString); ok {
 			ctx.Set("name", claims["name"])
