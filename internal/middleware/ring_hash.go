@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"hash/crc32"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -117,6 +118,26 @@ func ConsistentHash() gin.HandlerFunc {
 		}
 
 		newURL := "http://" + ip + ctx.Request.URL.Path
-		ctx.AbortWithStatusJSON(302, newURL)
+
+		if Transmit(ctx, newURL) {
+			ctx.AbortWithStatusJSON(200, "下单成功")
+			return
+		}
+		ctx.AbortWithStatusJSON(500, "转发请求失败或者下单失败")
 	}
+}
+
+func Transmit(ctx *gin.Context, path string) bool {
+	request, err := http.NewRequest("GET", path, nil)
+	errors.PrintInStdout(err)
+
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Authorization", ctx.GetHeader("Authorization"))
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil || response.StatusCode != 200 {
+		return false
+	}
+	return true
 }

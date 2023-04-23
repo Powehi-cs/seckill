@@ -15,8 +15,8 @@ func Router(router *gin.Engine) {
 	router.POST("/register", handler.Register)    // 注册逻辑
 
 	// 用户登录
-	router.GET("/login", middleware.AuthVerify(), handler.LoginPage) // 登录页面
-	router.POST("/login", handler.Login)                             // 登录逻辑
+	router.GET("/login", handler.LoginPage) // 登录页面
+	router.POST("/login", handler.Login)    // 登录逻辑
 
 	// 秒杀路由
 	products := router.Group("/:user_id/:product_id/").Use(middleware.AuthVerify(), middleware.ConsistentHash())
@@ -27,8 +27,8 @@ func Router(router *gin.Engine) {
 	}
 
 	// 管理员(唯一管理员)
-	router.GET("/admin/login", middleware.AuthVerify(), handler.AdminLoginPage) // 管理员登录页面
-	router.POST("/admin/login", handler.AdminLogin)                             // 管理员登录逻辑
+	router.GET("/admin/login", handler.AdminLoginPage) // 管理员登录页面
+	router.POST("/admin/login", handler.AdminLogin)    // 管理员登录逻辑
 	admin := router.Group("/admin/").Use(middleware.AuthVerify())
 	{
 		admin.GET("", handler.Search)    // 管理员查询商品

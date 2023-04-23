@@ -1,6 +1,9 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/Powehi-cs/seckill/internal/utils"
+	"github.com/gin-gonic/gin"
+)
 
 // AdminLogin 管理员登录
 func AdminLogin(ctx *gin.Context) {
@@ -9,7 +12,9 @@ func AdminLogin(ctx *gin.Context) {
 
 // AdminLoginPage 管理员登录页面
 func AdminLoginPage(ctx *gin.Context) {
-
+	if utils.Check(ctx) {
+		ctx.JSON(302, "/admin/")
+	}
 }
 
 // Search 查找商品

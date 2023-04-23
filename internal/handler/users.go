@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/Powehi-cs/seckill/internal/middleware"
 	"github.com/Powehi-cs/seckill/internal/model"
+	"github.com/Powehi-cs/seckill/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,7 +40,7 @@ func Login(ctx *gin.Context) {
 
 	// 如果redis或mysql中存在
 	if user.Select(ctx) {
-		if tokenString, ok := middleware.IssueToken(user.Name); ok {
+		if tokenString, ok := utils.IssueToken(user.Name); ok {
 			ctx.JSON(302, gin.H{"path": "/", "token": tokenString})
 		} else {
 			ctx.JSON(500, "token生成错误")
@@ -52,10 +52,11 @@ func Login(ctx *gin.Context) {
 
 // LoginPage 用户登录页面
 func LoginPage(ctx *gin.Context) {
-	if _, ok := ctx.Get("name"); ok {
+	if utils.Check(ctx) {
 		ctx.JSON(302, "/")
 		return
 	}
+
 	ctx.JSON(200, "欢迎来到登录界面")
 }
 
