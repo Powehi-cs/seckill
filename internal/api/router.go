@@ -29,6 +29,8 @@ func Router(router *gin.Engine) {
 	// 管理员(唯一管理员)
 	router.GET("/admin/login", handler.AdminLoginPage) // 管理员登录页面
 	router.POST("/admin/login", handler.AdminLogin)    // 管理员登录逻辑
+
+	// 管理员增删改查
 	admin := router.Group("/admin/").Use(middleware.AuthVerify())
 	{
 		admin.GET("", handler.Search)    // 管理员查询商品

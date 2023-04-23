@@ -1,10 +1,12 @@
 package errors
 
-import "log"
+import (
+	"log"
+)
 
 // PrintInStdout 输出命令行打印
 func PrintInStdout(err error) {
 	if err != nil {
-		log.Fatalln("出现错误: ", err.Error())
+		log.Fatalln("error: ", err.Error())
 	}
 }

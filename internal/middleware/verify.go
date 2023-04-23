@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/Powehi-cs/seckill/internal/utils"
+	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,7 @@ func AuthVerify() gin.HandlerFunc {
 			return
 		}
 
-		ctx.AbortWithStatusJSON(400, "token错误!")
+		ctx.AbortWithStatusJSON(200, utils.GetGinH(utils.TokenFail, "请先登录"))
 		return
 	}
 }

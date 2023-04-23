@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/Powehi-cs/seckill/internal/utils"
+	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ func AdminLogin(ctx *gin.Context) {
 // AdminLoginPage 管理员登录页面
 func AdminLoginPage(ctx *gin.Context) {
 	if utils.Check(ctx) {
-		ctx.JSON(302, "/admin/")
+		ctx.JSON(200, utils.GetGinH(utils.LoginSuccess, "管理员登录页面"))
 	}
 }
 
