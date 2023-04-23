@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"encoding/json"
 	"github.com/Powehi-cs/seckill/pkg/errors"
 	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"hash/crc32"
+	"io/ioutil"
 	"net/http"
 	"sort"
 	"strconv"
@@ -121,10 +123,10 @@ func ConsistentHash() gin.HandlerFunc {
 		newURL := "http://" + ip + ctx.Request.URL.Path
 
 		if Transmit(ctx, newURL) {
-			ctx.AbortWithStatusJSON(200, "下单成功")
+			ctx.AbortWithStatusJSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
 			return
 		}
-		ctx.AbortWithStatusJSON(500, "转发请求失败或者下单失败")
+		ctx.AbortWithStatusJSON(200, utils.GetGinH(utils.OrderFail, "下单失败"))
 	}
 }
 
@@ -137,8 +139,24 @@ func Transmit(ctx *gin.Context, path string) bool {
 
 	client := &http.Client{}
 	response, err := client.Do(request)
-	if err != nil || response.StatusCode != 200 {
+	if err != nil {
 		return false
 	}
-	return true
+
+	var result map[string]interface{}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return false
+	}
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return false
+	}
+
+	if result["code"].(float64) == 200 {
+		return true
+	}
+
+	return false
 }
