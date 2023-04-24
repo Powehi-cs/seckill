@@ -2,8 +2,12 @@ package handler
 
 import (
 	"github.com/Powehi-cs/seckill/internal/model"
+	"github.com/Powehi-cs/seckill/pkg/database"
+	"github.com/Powehi-cs/seckill/pkg/errors"
 	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
+	"time"
 )
 
 // Register 用户注册
@@ -78,6 +82,57 @@ func SecKill(ctx *gin.Context) {
 		ctx.JSON(200, utils.GetGinH(utils.OrderFail, "下单失败"))
 		return
 	}
+
 	// 2、通过redis lua脚本预扣减库存
-	ctx.JSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
+	if uid, ok := purchase(ctx); ok {
+		unLock(ctx, uid)
+		bl.Add(name.(string))
+		ctx.JSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
+		return
+	}
+
+	// 失败处理
+	ctx.JSON(200, utils.GetGinH(utils.OrderFail, "下单失败"))
+}
+
+// 释放锁
+func unLock(ctx *gin.Context, uid uuid.UUID) {
+	_, unlock := utils.GetPairLock()
+	rdb := database.GetRedis()
+	productID := ctx.Param("product_id")
+
+	_, err := rdb.Eval(ctx, unlock, []string{productID}, uid).Result()
+	errors.PrintInStdout(err)
+}
+
+// 加锁并对库存做预扣减
+func purchase(ctx *gin.Context) (uuid.UUID, bool) {
+	lock, _ := utils.GetPairLock()
+	rdb := database.GetRedis()
+	productID := ctx.Param("product_id")
+	uid := uuid.NewV4()
+
+	res, err := rdb.Eval(ctx, lock, []string{productID}, uid, 100).Result()
+	errors.PrintInStdout(err)
+
+	timeWait := time.After(time.Second)
+	finished := make(chan int)
+	stop := 0
+	go func() {
+		for res == 0 && stop != 1 {
+			res, _ = rdb.Eval(ctx, lock, []string{productID}, uid, 100).Result()
+		}
+		finished <- res.(int)
+	}()
+	select {
+	case <-timeWait:
+		stop = 1
+	case <-finished:
+	}
+
+	if res == 1 {
+		return uid, true
+	} else {
+		return uid, false
+	}
 }

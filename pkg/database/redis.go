@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 )
@@ -9,6 +10,7 @@ var rdb *redis.Client
 
 func RedisConnect() {
 	rdb = redis.NewClient(getOptions())
+	utils.InitLua()
 }
 
 func GetRedis() *redis.Client {
