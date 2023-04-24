@@ -20,3 +20,12 @@ func AuthVerify() gin.HandlerFunc {
 		return
 	}
 }
+
+func AuthAdmin() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		name, _ := ctx.Get("name")
+		if name != "yuan cheng" {
+			ctx.AbortWithStatusJSON(200, utils.GetGinH(400, "您不是管理员"))
+		}
+	}
+}

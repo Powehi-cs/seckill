@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"github.com/Powehi-cs/seckill/pkg/errors"
 	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"strconv"
+	"time"
 )
 
 // AdminLogin 管理员登录
@@ -35,4 +38,13 @@ func Update(ctx *gin.Context) {
 // Delete 删除商品
 func Delete(ctx *gin.Context) {
 
+}
+
+// SetSecKillProduct 将商品设为秒杀商品
+func SetSecKillProduct(ctx *gin.Context) {
+	productID := ctx.Param("product_id")
+	id, err := strconv.Atoi(productID)
+	errors.PrintInStdout(err)
+
+	utils.TransSecKillProduct(ctx, uint(id), 30*time.Minute)
 }

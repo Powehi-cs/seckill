@@ -22,8 +22,8 @@ func Router(router *gin.Engine) {
 	products := router.Group("/:user_id/:product_id/").Use(middleware.AuthVerify(), middleware.ConsistentHash())
 	{
 		// 用户秒杀
-		products.GET("", handler.ProductPage) // 单个产品页面
-		products.PUT("", handler.SecKill)     // 产品秒杀逻辑
+		products.GET("", handler.ProductPage)                   // 单个产品页面
+		products.PUT("", middleware.IsStart(), handler.SecKill) // 产品秒杀逻辑
 	}
 
 	// 管理员(唯一管理员)
@@ -33,9 +33,10 @@ func Router(router *gin.Engine) {
 	// 管理员增删改查
 	admin := router.Group("/admin/").Use(middleware.AuthVerify())
 	{
-		admin.GET("", handler.Search)    // 管理员查询商品
-		admin.POST("", handler.Insert)   // 管理员增加商品
-		admin.PUT("", handler.Update)    // 管理员修改商品
-		admin.DELETE("", handler.Delete) // 管理员删除商品
+		admin.GET("", handler.Search)                               // 管理员查询商品
+		admin.POST("", handler.Insert)                              // 管理员增加商品
+		admin.PUT("", handler.Update)                               // 管理员修改商品
+		admin.DELETE("", handler.Delete)                            // 管理员删除商品
+		admin.GET("seckill/:product_id", handler.SetSecKillProduct) // 设置秒杀商品
 	}
 }
