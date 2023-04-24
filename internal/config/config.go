@@ -14,14 +14,14 @@ import (
 func ReadConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	configPath := getPath()
-	viper.AddConfigPath(configPath)
+	rootPath := GetPath()
+	viper.AddConfigPath(rootPath + "/configs/")
 	err := viper.ReadInConfig()
 	errors.PrintInStdout(err)
 }
 
-// 获取配置文件路径
-func getPath() string {
+// GetPath 获取配置文件路径
+func GetPath() string {
 	getwd, err := os.Getwd()
 	errors.PrintInStdout(err)
 	fmt.Println(path.Dir(getwd))
@@ -38,5 +38,5 @@ func getPath() string {
 			break
 		}
 	}
-	return getwd + "/configs/"
+	return getwd
 }
