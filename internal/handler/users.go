@@ -4,6 +4,7 @@ import (
 	"github.com/Powehi-cs/seckill/internal/model"
 	"github.com/Powehi-cs/seckill/pkg/database"
 	"github.com/Powehi-cs/seckill/pkg/errors"
+	"github.com/Powehi-cs/seckill/pkg/rabbitMQ"
 	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
@@ -86,6 +87,9 @@ func SecKill(ctx *gin.Context) {
 	if uid, ok := purchase(ctx); ok {
 		unLock(ctx, uid)
 		bl.Add(name.(string))
+		// 异步的将订单送入rabbitMQ并让mysql去消费订单
+		mq := rabbitMQ.GetRabbitMQ()
+		mq.PublishSimple(ctx, ctx.Param("product_id"))
 		ctx.JSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
 		return
 	}

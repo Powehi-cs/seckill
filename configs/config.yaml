@@ -26,7 +26,11 @@ rabbitMQ:
   port: 5672
   user: yuancheng
   password: yc980704
-  name: seckill # 队列名称
+  exchange: seckill # 交换机名称
+  exchangeType: direct # 交换机类型
+  queue: seckill # 队列名称
+  routingKey: seckill # 路由(绑定到哪个queue)
+  continuous: false  # 是否恒定速率
 
 # consistent hash
 ringHash:
