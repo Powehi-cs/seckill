@@ -9,6 +9,8 @@ func GetGinH(rule int, msg string) gin.H {
 	switch rule {
 	case Error:
 		ret = getMsg(msg, 500)
+	case Fail:
+		ret = getMsg(msg, 400)
 	case Success:
 		ret = getMsg(msg, 200)
 	case RegisterSuccess:

@@ -7,7 +7,6 @@ import (
 	"github.com/Powehi-cs/seckill/pkg/utils"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"time"
 )
 
 // Register 用户注册
@@ -112,22 +111,11 @@ func purchase(ctx *gin.Context) (uuid.UUID, bool) {
 	productID := ctx.Param("product_id")
 	uid := uuid.NewV4()
 
-	res, err := rdb.Eval(ctx, lock, []string{productID}, uid, 100).Result()
+	res, err := rdb.Eval(ctx, lock, []string{productID}, uid).Int()
 	errors.PrintInStdout(err)
 
-	timeWait := time.After(time.Second)
-	finished := make(chan int)
-	stop := 0
-	go func() {
-		for res == 0 && stop != 1 {
-			res, _ = rdb.Eval(ctx, lock, []string{productID}, uid, 100).Result()
-		}
-		finished <- res.(int)
-	}()
-	select {
-	case <-timeWait:
-		stop = 1
-	case <-finished:
+	for res == 0 {
+		res, _ = rdb.Eval(ctx, lock, []string{productID}, uid).Int()
 	}
 
 	if res == 1 {

@@ -13,7 +13,7 @@ func IsStart() gin.HandlerFunc {
 		rdb := database.GetRedis()
 		_, err := rdb.Get(ctx, "inventory_"+productID).Result()
 		if err != nil {
-			ctx.AbortWithStatusJSON(200, utils.GetGinH(400, "秒杀尚未开始"))
+			ctx.AbortWithStatusJSON(200, utils.GetGinH(utils.OrderFail, "秒杀尚未开始"))
 			return
 		}
 		ctx.Next()
