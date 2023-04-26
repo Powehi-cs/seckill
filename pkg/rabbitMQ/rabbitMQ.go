@@ -92,14 +92,14 @@ func (r *RabbitMQ) PublishSimple(message string) {
 	errors.PrintInStdout(err)
 
 	//调用channel 发送消息到队列中
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err = r.channel.PublishWithContext(
 		ctx,
 		r.Exchange,
 		r.QueueName,
 		//如果为true，根据自身exchange类型和routekey规则无法找到符合条件的队列会把消息返还给发送者
-		false,
+		true,
 		//如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
 		false,
 		amqp.Publishing{
@@ -168,4 +168,5 @@ func (r *RabbitMQ) ConsumeSimple() {
 	}()
 	<-forever
 	r.Destroy()
+	log.Println("消费者退出")
 }
