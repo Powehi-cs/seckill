@@ -104,6 +104,7 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 			ContentType: "text/plain",
 			Body:        []byte(message),
 		})
+
 	// 等待
 	confirmed := <-r.confirms
 	if confirmed.Ack {
@@ -166,6 +167,6 @@ func (r *RabbitMQ) ConsumeSimple() {
 		}
 	}()
 	<-forever
-	//r.Destroy()
+	r.Destroy()
 	log.Println("消费者退出")
 }
