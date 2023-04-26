@@ -152,4 +152,5 @@ func (r *RabbitMQ) ConsumeSimple() {
 			}
 		}
 	}()
+	<-forever
 }
