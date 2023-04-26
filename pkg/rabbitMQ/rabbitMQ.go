@@ -86,7 +86,7 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 	)
 	errors.PrintInStdout(err)
 
-	confirms := r.channel.NotifyPublish(make(chan amqp.Confirmation, 1))
+	confirms := r.channel.NotifyPublish(make(chan amqp.Confirmation))
 	err = r.channel.Confirm(false)
 	errors.PrintInStdout(err)
 
@@ -100,8 +100,9 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 		//如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
 		false,
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "text/plain",
+			Body:         []byte(message),
 		})
 	// 等待
 	confirmed := <-confirms
@@ -158,7 +159,7 @@ func (r *RabbitMQ) ConsumeSimple() {
 				log.Fatalln("消费者退出！")
 			default:
 				log.Printf("Received a message: %s", d.Body)
-				err = d.Ack(true)
+				err = d.Ack(false)
 				errors.PrintInStdout(err)
 			}
 			log.Println("等待下一个")
