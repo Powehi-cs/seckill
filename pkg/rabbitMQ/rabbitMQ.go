@@ -1,15 +1,14 @@
 package rabbitMQ
 
 import (
-	"context"
 	"fmt"
 	"github.com/Powehi-cs/seckill/pkg/errors"
+	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"log"
 	"os"
 	"os/signal"
-	"time"
 )
 
 type RabbitMQ struct {
@@ -70,7 +69,7 @@ func NewRabbitMQSimple(queueName string) *RabbitMQ {
 }
 
 // PublishSimple 直接模式队列生产
-func (r *RabbitMQ) PublishSimple(message string) {
+func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
 	_, err := r.channel.QueueDeclare(
 		r.QueueName,
@@ -81,7 +80,7 @@ func (r *RabbitMQ) PublishSimple(message string) {
 		//是否具有排他性
 		false,
 		//是否阻塞处理
-		false, // 生产者ack
+		false,
 		//额外的属性
 		nil,
 	)
@@ -92,14 +91,12 @@ func (r *RabbitMQ) PublishSimple(message string) {
 	errors.PrintInStdout(err)
 
 	//调用channel 发送消息到队列中
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
 	err = r.channel.PublishWithContext(
 		ctx,
 		r.Exchange,
 		r.QueueName,
 		//如果为true，根据自身exchange类型和routekey规则无法找到符合条件的队列会把消息返还给发送者
-		true,
+		false,
 		//如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
 		false,
 		amqp.Publishing{
@@ -164,6 +161,7 @@ func (r *RabbitMQ) ConsumeSimple() {
 				err = d.Ack(true)
 				errors.PrintInStdout(err)
 			}
+			log.Println("等待下一个")
 		}
 	}()
 	<-forever

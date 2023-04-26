@@ -89,7 +89,7 @@ func SecKill(ctx *gin.Context) {
 		//bl.Add(name.(string))
 		// 异步的将订单送入rabbitMQ并让mysql去消费订单
 		mq := rabbitMQ.GetRabbitMQ()
-		mq.PublishSimple(ctx.Param("product_id"))
+		mq.PublishSimple(ctx, ctx.Param("product_id"))
 		ctx.JSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
 		return
 	}
