@@ -1,14 +1,15 @@
 package rabbitMQ
 
 import (
+	"context"
 	"fmt"
 	"github.com/Powehi-cs/seckill/pkg/errors"
-	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"log"
 	"os"
 	"os/signal"
+	"time"
 )
 
 type RabbitMQ struct {
@@ -69,7 +70,7 @@ func NewRabbitMQSimple(queueName string) *RabbitMQ {
 }
 
 // PublishSimple 直接模式队列生产
-func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
+func (r *RabbitMQ) PublishSimple(message string) {
 	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
 	_, err := r.channel.QueueDeclare(
 		r.QueueName,
@@ -86,7 +87,13 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 	)
 	errors.PrintInStdout(err)
 
+	confirms := r.channel.NotifyPublish(make(chan amqp.Confirmation, 1))
+	err = r.channel.Confirm(false)
+	errors.PrintInStdout(err)
+
 	//调用channel 发送消息到队列中
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err = r.channel.PublishWithContext(
 		ctx,
 		r.Exchange,
@@ -99,6 +106,13 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 			ContentType: "text/plain",
 			Body:        []byte(message),
 		})
+	// 等待
+	confirmed := <-confirms
+	if confirmed.Ack {
+		log.Println("ack success", confirmed.DeliveryTag)
+	} else {
+		log.Fatalln("ack error", confirmed.DeliveryTag)
+	}
 	errors.PrintInStdout(err)
 }
 
@@ -153,4 +167,5 @@ func (r *RabbitMQ) ConsumeSimple() {
 		}
 	}()
 	<-forever
+	r.Destroy()
 }

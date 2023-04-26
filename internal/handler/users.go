@@ -76,20 +76,20 @@ func ProductPage(ctx *gin.Context) {
 // SecKill 秒杀逻辑
 func SecKill(ctx *gin.Context) {
 	// 1、查看是否在黑名单中
-	bl := utils.GetBlackList()
-	name, ok := ctx.Get("name")
-	if !ok || bl.Get(name.(string)) {
-		ctx.JSON(200, utils.GetGinH(utils.OrderFail, "下单失败"))
-		return
-	}
+	//bl := utils.GetBlackList()
+	//name, ok := ctx.Get("name")
+	//if !ok || bl.Get(name.(string)) {
+	//	ctx.JSON(200, utils.GetGinH(utils.OrderFail, "下单失败"))
+	//	return
+	//}
 
 	// 2、通过redis lua脚本预扣减库存
 	if uid, ok := purchase(ctx); ok {
 		unLock(ctx, uid)
-		bl.Add(name.(string))
+		//bl.Add(name.(string))
 		// 异步的将订单送入rabbitMQ并让mysql去消费订单
 		mq := rabbitMQ.GetRabbitMQ()
-		mq.PublishSimple(ctx, ctx.Param("product_id"))
+		mq.PublishSimple(ctx.Param("product_id"))
 		ctx.JSON(200, utils.GetGinH(utils.OrderSuccess, "下单成功"))
 		return
 	}
