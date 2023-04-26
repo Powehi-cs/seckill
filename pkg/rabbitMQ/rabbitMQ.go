@@ -22,6 +22,8 @@ type RabbitMQ struct {
 	Key string
 	//连接信息
 	MqUrl string
+	// 验证
+	confirms chan amqp.Confirmation
 }
 
 var mq *RabbitMQ
@@ -65,12 +67,15 @@ func NewRabbitMQSimple(queueName string) *RabbitMQ {
 	rabbitmq.channel, err = rabbitmq.conn.Channel()
 	errors.PrintInStdout(err)
 
+	rabbitmq.confirms = rabbitmq.channel.NotifyPublish(make(chan amqp.Confirmation))
+	err = rabbitmq.channel.Confirm(false)
+	errors.PrintInStdout(err)
+
 	return rabbitmq
 }
 
 // PublishSimple 直接模式队列生产
 func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
-	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
 	_, err := r.channel.QueueDeclare(
 		r.QueueName,
 		//是否持久化
@@ -84,10 +89,6 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 		//额外的属性
 		nil,
 	)
-	errors.PrintInStdout(err)
-
-	confirms := r.channel.NotifyPublish(make(chan amqp.Confirmation))
-	err = r.channel.Confirm(false)
 	errors.PrintInStdout(err)
 
 	//调用channel 发送消息到队列中
@@ -105,7 +106,7 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 			Body:         []byte(message),
 		})
 	// 等待
-	confirmed := <-confirms
+	confirmed := <-r.confirms
 	if confirmed.Ack {
 		log.Println("ack success", confirmed.DeliveryTag)
 	} else {
@@ -159,7 +160,7 @@ func (r *RabbitMQ) ConsumeSimple() {
 				log.Fatalln("消费者退出！")
 			default:
 				log.Printf("Received a message: %s", d.Body)
-				err = d.Ack(false)
+				err = d.Ack(true)
 				errors.PrintInStdout(err)
 			}
 			log.Println("等待下一个")
