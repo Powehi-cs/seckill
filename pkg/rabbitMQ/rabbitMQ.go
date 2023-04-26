@@ -101,9 +101,8 @@ func (r *RabbitMQ) PublishSimple(ctx *gin.Context, message string) {
 		//如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
 		false,
 		amqp.Publishing{
-			DeliveryMode: amqp.Persistent,
-			ContentType:  "text/plain",
-			Body:         []byte(message),
+			ContentType: "text/plain",
+			Body:        []byte(message),
 		})
 	// 等待
 	confirmed := <-r.confirms
@@ -167,6 +166,6 @@ func (r *RabbitMQ) ConsumeSimple() {
 		}
 	}()
 	<-forever
-	r.Destroy()
+	//r.Destroy()
 	log.Println("消费者退出")
 }
