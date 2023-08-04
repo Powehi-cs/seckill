@@ -1,2 +1,2 @@
 # seckill
-基于Gin的商城秒杀系统
+Gin-based mall flash sale system
